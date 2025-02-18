@@ -3,7 +3,7 @@ import logging
 
 from app.config import settings
 from app.src.core import db
-from app.src.routers import users_router
+from app.src.routers import users_router, setup_swagger
 
 
 def init_logging() -> None:
@@ -25,6 +25,10 @@ def create_app() -> Flask:
 
     # registration routers
     app.register_blueprint(users_router)
+
+    # init Swagger
+    setup_swagger(app)
+
     return app
 
 

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     IS_DEBUG: bool
 
+    PATH_TO_DOCS: str = "/docs/openapi.yaml"
+    SWAGGER_API_URL: str = "/api/docs/"
+
     model_config = SettingsConfigDict(
         env_file=".env",
     )

@@ -72,7 +72,5 @@ class UserFromDB(BaseUser):
             id=self.id,
             username=self.username,
             email=self.email,
-            registration_date=self.registration_date.strftime(
-                "%d/%m/%Y, %H:%M:%S"
-            ),
+            registration_date=self.registration_date.isoformat(),
         )

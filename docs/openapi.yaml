@@ -1,0 +1,420 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: API for managing users
+  version: 1.0.0
+servers:
+  - url: http://localhost:5001/api
+    description: Local server
+paths:
+  /users/:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Endpoint for getting all users. Pagination is optional.
+      parameters:
+        - name: offset
+          in: query
+          description: Which user account will be the starting point
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: Number of users to fetch
+          required: false
+          schema:
+            type: integer
+            default: 5
+            minimum: 0
+            maximum: 1000
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserFromDB'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      description: Endpoint for creating user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFromDB'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /users/{id}/:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Endpoint for getting user by id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: User data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFromDB'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    patch:
+      tags:
+        - Users
+      summary: Update user
+      description: Endpoint for updating user.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFromDB'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Endpoint for deleting user.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /users/stats/from_last_week:
+    get:
+      tags:
+        - Users
+      summary: Get count of users registered from last week
+      description: Endpoint for getting count of users registered from last week.
+      responses:
+        '200':
+          description: Count of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /users/stats/top_longest_username:
+    get:
+      tags:
+        - Users
+      summary: Get top 5 users with the longest username
+      description: Endpoint for getting top 5 users with the longest username.
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserFromDB'
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /users/stats/with_email_domain/{domain}:
+    get:
+      tags:
+        - Users
+      summary: Get users with email domain
+      description: Endpoint for getting users with email domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          description: Email domain
+          schema:
+            type: string
+            format: hostname
+      responses:
+        '200':
+          description: Proportion of users with the specified email domain
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domain:
+                    type: string
+                    format: hostname
+                  proportion:
+                    type: number
+                    format: float
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+components:
+  schemas:
+    BaseUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User's username field. At least 3 characters in length and lower then 32.
+          minLength: 3
+          maxLength: 32
+        email:
+          type: string
+          format: email
+          description: Email field with validation. At least 6 characters in length and lower then 64.
+          minLength: 6
+          maxLength: 64
+      required:
+        - username
+        - email
+    UserCreate:
+      allOf:
+        - $ref: '#/components/schemas/BaseUser'
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User's username field. At least 3 characters in length and lower then 32.
+          minLength: 3
+          maxLength: 32
+          nullable: true
+        email:
+          type: string
+          format: email
+          description: Email field with validation. At least 6 characters in length and lower then 64.
+          minLength: 6
+          maxLength: 64
+          nullable: true
+    UserFromDB:
+      allOf:
+        - $ref: '#/components/schemas/BaseUser'
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User's identification number.
+          minimum: 0
+        registration_date:
+          type: string
+          format: date-time
+          description: User's registration date.
+      required:
+        - id
+        - registration_date
+    ValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  type: string
+                description: Location of the error (e.g., ["body", "username"]).
+              msg:
+                type: string
+                description: Error message.
+              type:
+                type: string
+                description: Type of the error (e.g., "value_error").
+      required:
+        - detail
