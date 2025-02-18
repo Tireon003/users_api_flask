@@ -4,11 +4,17 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 import datetime as dt
+from typing import TYPE_CHECKING
 
-from app.src.core import Base
+if TYPE_CHECKING:
+    from sqlalchemy.orm import declarative_base
+
+    Base = declarative_base()
+else:
+    from app.src.core import Base
 
 
-class User(Base):  # type: ignore
+class User(Base):
     """
     User ORM model.
 
