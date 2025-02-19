@@ -1,10 +1,10 @@
 from flask import Flask, Response
 from flask_swagger_ui import get_swaggerui_blueprint
 
-from app.config import settings
+from app.config import Settings
 
 
-def setup_swagger(app: Flask) -> None:
+def setup_swagger(app: Flask, settings: Settings) -> None:
     """
     Swagger configuration setup for Flask application.
     """
