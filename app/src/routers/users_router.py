@@ -49,7 +49,7 @@ def get_user(id: int) -> Response:
     try:
         user = repo.get_one(id)
     except UserNotFoundException as exc:
-        err_body = {"error": str(exc)}
+        err_body = {"error": f"User with id {exc.user_id} not found"}
         return make_response(
             jsonify(err_body),
             404,
@@ -78,10 +78,12 @@ def create_user(body: UserCreate) -> Response:
             201,
         )
     except UserAlreadyExistsException as exc:
-        err_body = {"error": str(exc)}
+        err_body = {
+            "error": f"User with {exc.field} '{exc.value}' already exists"
+        }
         return make_response(
             jsonify(err_body),
-            404,
+            409,
         )
 
 
@@ -103,10 +105,18 @@ def update_user(id: int, body: UserUpdate) -> Response:
             200,
         )
     except UserNotFoundException as exc:
-        err_body = {"error": str(exc)}
+        err_body = {"error": f"User with id {exc.user_id} not found"}
         return make_response(
             jsonify(err_body),
             404,
+        )
+    except UserAlreadyExistsException as exc:
+        err_body = {
+            "error": f"User with {exc.field} '{exc.value}' already exists"
+        }
+        return make_response(
+            jsonify(err_body),
+            409,
         )
 
 
@@ -125,7 +135,7 @@ def delete_user(id: int) -> Response:
             200,
         )
     except UserNotFoundException as exc:
-        err_body = {"error": str(exc)}
+        err_body = {"error": f"User with id {exc.user_id} not found"}
         return make_response(
             jsonify(err_body),
             404,
@@ -172,13 +182,20 @@ def get_users_with_email_domain(domain: str) -> Response:
     """
     repo = UserRepository(db)
     service = UserService(repo)
-    proportion = service.get_proportion_with_domain(domain)
-    return make_response(
-        jsonify(
-            {
-                "domain": domain,
-                "proportion": proportion,
-            }
-        ),
-        200,
-    )
+    try:
+        proportion = service.get_proportion_with_domain(domain)
+        return make_response(
+            jsonify(
+                {
+                    "domain": domain,
+                    "proportion": proportion,
+                }
+            ),
+            200,
+        )
+    except ValueError:
+        err_body = {"error": f"Invalid domain: {domain}"}
+        return make_response(
+            jsonify(err_body),
+            400,
+        )

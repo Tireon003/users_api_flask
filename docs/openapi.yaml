@@ -79,7 +79,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-        '404':
+        '409':
           description: User already exists
           content:
             application/json:
@@ -176,6 +176,15 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: Can not update user because user with such data already exists
           content:
             application/json:
               schema:
@@ -333,7 +342,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                type: object
+                properties:
+                  error:
+                    type: string
         '500':
           description: Internal server error
           content:
@@ -350,13 +362,13 @@ components:
       properties:
         username:
           type: string
-          description: User's username field. At least 3 characters in length and lower then 32.
+          description: User's username field. At least 3 characters in length and lower than 32.
           minLength: 3
           maxLength: 32
         email:
           type: string
           format: email
-          description: Email field with validation. At least 6 characters in length and lower then 64.
+          description: Email field with validation. At least 6 characters in length and lower than 64.
           minLength: 6
           maxLength: 64
       required:
@@ -370,14 +382,14 @@ components:
       properties:
         username:
           type: string
-          description: User's username field. At least 3 characters in length and lower then 32.
+          description: User's username field. At least 3 characters in length and lower than 32.
           minLength: 3
           maxLength: 32
           nullable: true
         email:
           type: string
           format: email
-          description: Email field with validation. At least 6 characters in length and lower then 64.
+          description: Email field with validation. At least 6 characters in length and lower than 64.
           minLength: 6
           maxLength: 64
           nullable: true

@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from flask_sqlalchemy import SQLAlchemy
 
-from app.src.exceptions import UserNotFoundException
+from app.src.exceptions import (
+    UserNotFoundException,
+    UserAlreadyExistsException,
+)
 from app.src.models import User
 from app.src.schemas.entities import UserUpdate, UserCreate
 from app.src.schemas.query import UserPaginatorQueryParams
@@ -57,7 +60,7 @@ class UserRepository:
         result = self._get_user_by_field("id", str(id))
 
         if result is None:
-            raise UserNotFoundException(f"User with id '{id}' not found")
+            raise UserNotFoundException(user_id=id)
 
         return result
 
@@ -68,12 +71,20 @@ class UserRepository:
         :param data: user update data
         :return: updated user model
         """
+        # check if another user with provided data already exists
+        for field, value in data.model_dump().items():
+            other_user_with_provided_new_field = self._get_user_by_field(
+                field, value
+            )
+            if (
+                other_user_with_provided_new_field is not None
+                and other_user_with_provided_new_field.id != id
+            ):
+                raise UserAlreadyExistsException(field=field, value=value)
+
         user = self.get_one(id)
-        if data.email is not None:
-            user.email = data.email
-        if data.username is not None:
-            user.username = data.username
-        self._db.session.add(user)
+        user.email = data.email or user.email  # takes new val or old val
+        user.username = data.username or user.username  # takes new val or old val
         self._db.session.commit()
         return user
 
@@ -89,9 +100,7 @@ class UserRepository:
         for field, value in user_dict.items():
             found_user_by_field = self._get_user_by_field(field, value)
             if found_user_by_field is not None:
-                raise UserNotFoundException(
-                    f"User with {field} '{value}' already exists"
-                )
+                raise UserAlreadyExistsException(field=field, value=value)
 
         user_model = User(**user.model_dump())
         self._db.session.add(user_model)
